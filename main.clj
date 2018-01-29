@@ -1,6 +1,6 @@
                           ;;AI Programming 
    ;;-----------------------------------------------------------
-  ;; 1. Using only the first and rest functions, write the sequences of expressions that retrieve the X from the following lists/vectors.
+    ;; 1. Using only the first and rest functions, write the sequences of expressions that retrieve the X from the following lists/vectors.
    ;;-----------------------------------------------------------
 
 ;; 1.1: ‘(a X b c)
