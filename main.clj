@@ -1,5 +1,5 @@
-                      ;;AI Programming 
-  ;;-----------------------------------------------------------
+                          ;;AI Programming 
+   ;;-----------------------------------------------------------
   ;; 1. Using only the first and rest functions, write the sequences of expressions that retrieve the X from the following lists/vectors. -----------------------------------------------------------
 
 ;; 1.1: ‘(a X b c)
@@ -77,20 +77,71 @@
 ('{:a egg, :b spam, :c chips} :b)
 
 ;; 5.2
-'(cat dog {:a egg, :b spam, :c chips} rat frog)
-
+((first (rest (rest '(cat dog {:a egg, :b spam, :c chips} rat frog)))) :b)
+ 
 ;; 5.3 
-'(cat [dog bat] {fruit #{mango melon pawpaw},breakfast {:a egg, :b spam, :c chips}} rat frog)
+((first (rest (first (rest (first (rest (rest '(cat [dog bat] {fruit #{mango melon pawpaw},breakfast {:a egg, :b spam, :c chips}} rat frog)))))))) :b)
+
+
 
 ;; 5.4: investigate at 5.3 & describe all the data structures it contains.
-
+;; Question 5.3 has Lists, Vectors, maps and a set 
 
 ;;-----------------------------------------------------------
 ;; 6. There is a number puzzle where you start from one number and have to reach another number in as few steps as possible using only a small number of mathematical operations. For example: given legal mathematical operations of multiplying by 10, dividing by 2, adding 5 and subtracting 3, what step are required to get from 7 to 57. -----------------------------------------------------------
 
+;; breadth first search mechanism
+;; @args start start state
+;; @args goal either a predicate to take a state determine if it is a goal
+;;or a state equal to the goal
+;; @args LMG  legal move generator function which takes one state & returns a list of states
+;; @args compare is a function which compares 2 states for equality,
+;; = is used by default
+;; @args debug prints some information
+
+(declare breadth-search-)
+
+(defn breadth-search
+  [start goal lmg & {:keys [debug compare]
+                     :or {debug    false
+                          compare  =    }}]
+  (let [goal? (if (fn? goal)
+                #(when (goal %) %)
+                #(when (= % goal) %))
+        ]
+    ;; a daft check but required just in case
+    (or (goal? start)
+      (breadth-search- `((~start)) goal? lmg compare debug)
+      )))
+
+
+(defn breadth-search- [waiting goal? lmg compare debug]
+  (let [member? (fn [lis x] (some (partial compare x) lis))
+        visited #{}
+        ]
+    (when debug (println 'waiting= waiting 'visited= visited))
+    (loop [waiting waiting
+           visited visited
+           ]
+      (if (empty? waiting) nil
+        (let [ [next & waiting] waiting
+               [state & path] next
+               visited? (partial member? visited)
+               ]
+          (if (visited? state)
+            (recur waiting visited)
+            (let [succs (remove visited? (lmg state))
+                  g     (some goal? succs)
+                  ]
+              (if g (reverse (cons g next))
+                (recur (concat waiting (map #(cons % next) succs))
+                  (cons state visited) ))
+              )))))))
+(defn lmg [n]
+  (list (* n 10) (/ n 2) (+ n 5) (- n 3)))
+(breadth-search 7 57 lmg)
+
 
 ;;-----------------------------------------------------------
 ;; 7. Design a state representation and a transformation function for the “Farmer, Dog, Goose, Corn” problem. -----------------------------------------------------------
-
-
-
+(defn initial-state #{:Farmer, :Dog, :Goose, :Corn} #{:boat} #{})
